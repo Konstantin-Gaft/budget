@@ -38,7 +38,7 @@ const K_MAIL  = 'budget-cloud-email-pending';
 const K_CLIENT= 'budget-cloud-client';
 const K_SNAP  = 'budget-cloud-snapshot-precloud'; // снимок ДО первого применения облака
 
-const APP_URL = 'https://kg881.github.io/budget/beta/';
+const APP_URL = 'https://konstantin-gaft.github.io/budget/beta/';
 const LISTS = ['goals', 'bonuses', 'accounts', 'sinkingFunds', 'bonusHistory'];
 
 /* ---------- клиентский идентификатор (чтобы не реагировать на свои же записи) */
@@ -341,7 +341,7 @@ async function sendLink(mail) {
   } catch (e) {
     setStatus('err', 'ошибка входа');
     alert('Не вышло: ' + e.message + (String(e.message).includes('unauthorized-domain')
-      ? '\n\nДобавь домен kg881.github.io в Firebase → Authentication → Settings → Authorized domains.' : ''));
+      ? '\n\nДобавь домен konstantin-gaft.github.io в Firebase → Authentication → Settings → Authorized domains.' : ''));
   }
 }
 

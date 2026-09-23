@@ -355,7 +355,7 @@ async function sendLink(mail) {
   } catch (e) {
     setStatus('err', 'ошибка входа');
     alert('Не вышло: ' + e.message + (String(e.message).includes('unauthorized-domain')
-      ? '\n\nДобавь домен kg881.github.io в Firebase → Authentication → Settings → Authorized domains.' : ''));
+      ? '\n\nДобавь домен konstantin-gaft.github.io в Firebase → Authentication → Settings → Authorized domains.' : ''));
   }
 }
 

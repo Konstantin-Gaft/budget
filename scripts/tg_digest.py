@@ -233,7 +233,7 @@ def build_digest(st):
         L.extend('• ' + r for r in rem)
         L.append('')
 
-    L.append('<i>kg881.github.io/budget</i>')
+    L.append('<i>konstantin-gaft.github.io/budget</i>')
     return '\n'.join(L).strip()
 
 

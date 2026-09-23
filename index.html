@@ -712,7 +712,7 @@ let syncState='idle'; // idle|sync|ok|err|blocked
 function syncBlocked(){return location.protocol==='file:';}
 async function syncBonuses(manual){
   const cfg=state.bonusSync;if(!cfg||!cfg.enabled||!cfg.sheetId)return;
-  if(syncBlocked()){syncState='blocked';updateSyncChip();if(manual)alert('Синк с таблицей не работает при открытии локального файла (ограничение браузера). Открой облачную версию: kg881.github.io/budget');return null;}
+  if(syncBlocked()){syncState='blocked';updateSyncChip();if(manual)alert('Синк с таблицей не работает при открытии локального файла (ограничение браузера). Открой облачную версию: konstantin-gaft.github.io/budget');return null;}
   syncState='sync';updateSyncChip();
   try{
     const url=`https://docs.google.com/spreadsheets/d/${cfg.sheetId}/export?format=csv&gid=${cfg.gid||0}`;
