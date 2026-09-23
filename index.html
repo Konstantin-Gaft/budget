@@ -1547,6 +1547,13 @@ render();
 restoreHandle();
 startSyncLoop();
 startDevLoop();
+// Подключение по ссылке: …/budget/#link=<код> — то же, что вставить код в «Подключить устройство».
+// Нужно при переезде приложения на другой домен: localStorage там пустой, а ключ и токен вводить
+// руками с телефона неудобно. Хеш не уходит на сервер и стирается из адреса сразу после чтения.
+(()=>{const m=location.hash.match(/^#link=([A-Za-z0-9+/=]+)/);if(!m)return;
+  history.replaceState(null,'',location.pathname+location.search);
+  if(devSyncCfg&&devSyncCfg.owner){if(!confirm('Синк уже подключён к '+devSyncCfg.owner+'/'+devSyncCfg.repo+'. Переподключить по ссылке?'))return;}
+  devLink(m[1]);})();
 fetchCbr().then(r=>{cbrNow=r;updateChips();if(showUsd())render();}).catch(()=>{cbrNow=null;const c=sheet.querySelector('#cbrChip');if(c)c.innerHTML='<span class="dot"></span>ЦБ офлайн';});
 </script>
 <script type="module" src="./cloud.js"></script>
