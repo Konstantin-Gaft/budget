@@ -1051,7 +1051,8 @@ function secMonth(){
       `</div>`;
   }
 
-  const catRows=m.expenses.map(e=>{
+  // Закрытые живут только в журнале справа; вернуть — кнопкой ↺ там
+  const catRows=m.expenses.filter(e=>!e.closed).map(e=>{
     return `<div class="cat ${e.closed?'done':''}" data-eid="${e.id}">
       <span class="mk" data-act="toggle" title="${e.closed?'вернуть в план':'отметить погашенным'}"></span>
       <span class="nm"><input class="inp" data-f="name" value="${esc(e.name)}"${dis}></span>
