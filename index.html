@@ -513,7 +513,8 @@ function incBy(ym){
   return{by,sal,extra,total:sal+extra,has:src.length>0||m.incomeFact!=null,n:src.length};
 }
 function incFact(ym){const b=incBy(ym);return b.has?b.total:null;}
-function bonusRub(b){return b.rub!=null?b.rub:(b.usd!=null?b.usd*(b.rate||state.settings.planRate):0);}
+// Пул хранится в долларах: рубли — всегда по текущему курсу ЦБ (нет сети — плановый из настроек)
+function bonusRub(b){return b.rub!=null?b.rub:(b.usd!=null?b.usd*curRate():0);}
 
 function totals(ym){
   const m=getMonth(ym);
@@ -1228,11 +1229,10 @@ function whatIfMonth(have,amount,monthlyRub){
 function bonusRows(){
   if(!state.bonuses.length)return'<div class="empty" style="padding:6px 0">Бонусов пока нет.</div>';
   return state.bonuses.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(b=>`
-    <div class="inc" data-bid="${b.id}" style="grid-template-columns:auto 1fr auto auto auto">
+    <div class="inc" data-bid="${b.id}" style="grid-template-columns:auto 1fr auto auto">
       <span><input type="month" class="inp" data-f="dateM" value="${(b.date||'').slice(0,7)}" style="font-size:11px"></span>
       <span class="nm"><input class="inp" data-f="note" value="${esc(b.note||'')}" placeholder="за что"></span>
       <span><input class="inp ni w56" data-f="usd" value="${b.usd??''}" placeholder="$"></span>
-      <span style="display:flex;gap:5px;align-items:center"><input class="inp ni w56" data-f="rate" value="${b.rate??''}" placeholder="курс"><button class="cbrbtn" data-act="bcbr">ЦБ</button></span>
       <span style="display:flex;gap:6px;align-items:center;justify-content:flex-end"><span class="num" style="font-size:12px;color:var(--ink-3)">${fmt(bonusRub(b))} ₽</span><button class="entry re" data-act="bdel">✕</button></span>
     </div>`).join('');
 }
@@ -1555,7 +1555,7 @@ startDevLoop();
   history.replaceState(null,'',location.pathname+location.search);
   if(devSyncCfg&&devSyncCfg.owner){if(!confirm('Синк уже подключён к '+devSyncCfg.owner+'/'+devSyncCfg.repo+'. Переподключить по ссылке?'))return;}
   devLink(m[1]);})();
-fetchCbr().then(r=>{cbrNow=r;updateChips();if(showUsd())render();}).catch(()=>{cbrNow=null;const c=sheet.querySelector('#cbrChip');if(c)c.innerHTML='<span class="dot"></span>ЦБ офлайн';});
+fetchCbr().then(r=>{cbrNow=r;updateChips();render();}).catch(()=>{cbrNow=null;const c=sheet.querySelector('#cbrChip');if(c)c.innerHTML='<span class="dot"></span>ЦБ офлайн';});
 </script>
 <script type="module" src="./cloud.js"></script>
 </body>
