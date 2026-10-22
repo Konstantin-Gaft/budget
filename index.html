@@ -366,6 +366,7 @@ let state=loadLocal()||defaultState();
 migrate();
 let detailYM=todayYM();
 let regOpen=false;   // помесячные строки реестра: по умолчанию свёрнуты
+let incOpen=false;   // помесячные строки источников дохода: по умолчанию свёрнуты
 
 /* ===================== date/format ===================== */
 function todayYM(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
@@ -963,7 +964,7 @@ function secRegister(rows,cur){
 
 /* ===== 03 · Источники дохода: откуда деньги и чем закрыт перерасход ===== */
 function secIncome(rows){
-  const head=`<div class="sec-head"><span class="idx">02</span><h2>Источники дохода</h2><span class="sec-note">откуда пришло · чем закрыт перерасход над зп</span></div>`;
+  const head=`<div class="sec-head"><span class="idx">02</span><h2>Источники дохода</h2><span class="sec-note">откуда пришло · чем закрыт перерасход над зп</span>${rows.some(r=>r.incHas||r.efReal>0)?`<button class="btn sm" id="incTog">${incOpen?'свернуть':'показать по месяцам'}</button>`:''}</div>`;
   const R=rows.filter(r=>r.incHas||r.efReal>0);
   if(!R.length)return `<section class="sec">${head}
     <div class="empty">Пока ни одного источника. Открой месяц ниже и добавь строки: зарплата, бонус, мероприятие — здесь появится разбивка.</div>
@@ -1009,7 +1010,7 @@ function secIncome(rows){
         <th>Расход<span class="sub">факт</span></th>
         <th>Сверх зп<span class="sub">добито</span></th>
       </tr></thead>
-      <tbody>${body}</tbody>
+      <tbody${incOpen?'':' class="hid"'}>${body}</tbody>
       <tfoot><tr>
         <td class="mon">Итого</td>
         <td class="num">${z(iy.by.salary)}</td><td class="num">${z(iy.by.bonus)}</td>
@@ -1339,6 +1340,7 @@ function bind(rows){
 
   // реестр: раскрыть/свернуть помесячные строки
   sheet.querySelector('#regTog')?.addEventListener('click',()=>{regOpen=!regOpen;render();});
+  sheet.querySelector('#incTog')?.addEventListener('click',()=>{incOpen=!incOpen;render();});
 
   // currency toggle
   sheet.querySelector('#curTog')?.addEventListener('click',()=>{state.settings.showUsd=!state.settings.showUsd;save();render();});
