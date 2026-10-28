@@ -181,6 +181,8 @@
   .entry .a{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--ink-3);text-decoration:line-through;text-decoration-thickness:1px;white-space:nowrap}
   .entry .re{appearance:none;background:none;border:none;color:var(--ink-3);cursor:pointer;font-size:11px;padding:0 2px}
   .entry .re:hover{color:var(--accent)}
+  .entry .paid.off{color:var(--ink-2);border-color:var(--rule-2)}
+  .entry .a.off{opacity:.45}
   .empty{color:var(--ink-3);font-size:12px;padding:14px 0;font-style:italic}
   .log-sum{margin-top:16px;padding:14px 16px;background:var(--paper-2);border:1px solid var(--rule)}
   .log-sum .row{display:flex;justify-content:space-between;align-items:baseline;padding:3px 0}
@@ -521,19 +523,21 @@ function totals(ym){
   const m=getMonth(ym);
   const ip=incPlan(ym);
   const if_=incFact(ym);
-  const ep=m.expenses.reduce((s,r)=>s+(r.plan||0),0);
-  const closed=m.expenses.filter(e=>e.closed);
+  // offset: покупка оплачена из конверта/в долг, расходом считаются возвраты — сама запись в суммы не идёт
+  const ex=m.expenses.filter(e=>!e.offset);
+  const ep=ex.reduce((s,r)=>s+(r.plan||0),0);
+  const closed=ex.filter(e=>e.closed);
   const anyClosed=closed.length>0;
   const efClosed=closed.reduce((s,e)=>s+((e.fact!=null?e.fact:e.plan)||0),0);
   // «реально ушло»: закрытые категории + открытые, где уже проставлен факт
-  const efReal=m.expenses.reduce((s,e)=>s+(e.fact!=null?(e.fact||0):(e.closed?(e.plan||0):0)),0);
+  const efReal=ex.reduce((s,e)=>s+(e.fact!=null?(e.fact||0):(e.closed?(e.plan||0):0)),0);
   const ib=incBy(ym);
   const topup=Math.max(0,efReal-ib.sal);   // сколько расходов зарплата не покрыла
-  const openSum=m.expenses.filter(e=>!e.closed).reduce((s,e)=>s+(e.plan||0),0);
+  const openSum=ex.filter(e=>!e.closed).reduce((s,e)=>s+(e.plan||0),0);
   const dPlan=ip-ep;
   const hasFact=if_!=null||anyClosed;
   const dFact=hasFact?((if_!=null?if_:ip)-efClosed):null;
-  return{ip,if_,ep,efClosed,efReal,openSum,anyClosed,closedCount:closed.length,catCount:m.expenses.length,dPlan,dFact,hasFact,locked:!!m.locked,
+  return{ip,if_,ep,efClosed,efReal,openSum,anyClosed,closedCount:closed.length,catCount:ex.length,dPlan,dFact,hasFact,locked:!!m.locked,
     sal:ib.sal,extra:ib.extra,incBy:ib.by,incHas:ib.has,incN:ib.n,topup};
 }
 function annualPlanDelta(){return horizon().reduce((s,ym)=>s+totals(ym).dPlan,0);}
@@ -1070,9 +1074,9 @@ function secMonth(){
     const vtag=e.fact!=null&&vari!==0?`<span class="vari ${vari>0?'neg':'pos'}">${vari>0?'+':'−'}${fmt(Math.abs(vari))}</span>`:'';
     return `<div class="entry" data-eid="${e.id}">
       <span class="d num">${ddmm(e.closedDate)}</span>
-      <span class="nm">${esc(e.name)} <span class="paid">погашено</span>${vtag}</span>
-      <span class="a num">${fmt(f)}</span>
-      <button class="re" data-act="reopen" title="вернуть в план">↺</button>
+      <span class="nm">${esc(e.name)} <span class="paid">погашено</span>${e.offset?'<span class="paid off">взаимозачёт</span>':vtag}</span>
+      <span class="a num ${e.offset?'off':''}">${fmt(f)}</span>
+      <span><button class="re" data-act="offset" title="${e.offset?'снова считать расходом':'взаимозачёт: оплачено из конверта или в долг, расходом считаются возвраты'}">⇄</button><button class="re" data-act="reopen" title="вернуть в план">↺</button></span>
     </div>`;}).join(''):'<div class="empty">Ещё ничего не закрыто. Отметь категорию слева — она уйдёт сюда.</div>';
 
   const closeCtl=locked
@@ -1402,6 +1406,7 @@ function bind(rows){
 
   // journal reopen
   sheet.querySelectorAll('.ledger .entry[data-eid]').forEach(el=>{
+    el.querySelector('[data-act=offset]')?.addEventListener('click',()=>{const mm=matM(detailYM);if(mm.locked)return;const r=mm.expenses.find(x=>x.id===el.dataset.eid);if(r){r.offset=!r.offset;save();render();}});
     el.querySelector('[data-act=reopen]')?.addEventListener('click',()=>{const mm=matM(detailYM);if(mm.locked)return;const r=mm.expenses.find(x=>x.id===el.dataset.eid);if(r){r.closed=false;r.closedDate=null;save();render();}});
   });
 
